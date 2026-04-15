@@ -53,7 +53,7 @@ import org.openapitools.client.JSON;
 /**
  * Dish
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-04-15T14:16:33.152447600+03:00[Africa/Nairobi]", comments = "Generator version: 7.7.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-04-15T14:31:05.429446200+03:00[Africa/Nairobi]", comments = "Generator version: 7.7.0")
 public class Dish {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)

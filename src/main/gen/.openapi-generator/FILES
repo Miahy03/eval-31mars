@@ -1,6 +1,5 @@
 .github/workflows/maven.yml
 .gitignore
-.openapi-generator-ignore
 .travis.yml
 README.md
 api/openapi.yaml
@@ -53,13 +52,3 @@ src/main/java/org/openapitools/client/model/DishTypeEnum.java
 src/main/java/org/openapitools/client/model/Ingredient.java
 src/main/java/org/openapitools/client/model/StockValue.java
 src/main/java/org/openapitools/client/model/UnitType.java
-src/test/java/org/openapitools/client/api/DishesApiTest.java
-src/test/java/org/openapitools/client/api/IngredientsApiTest.java
-src/test/java/org/openapitools/client/model/CategoryEnumTest.java
-src/test/java/org/openapitools/client/model/DishIngredientIngredientTest.java
-src/test/java/org/openapitools/client/model/DishIngredientTest.java
-src/test/java/org/openapitools/client/model/DishTest.java
-src/test/java/org/openapitools/client/model/DishTypeEnumTest.java
-src/test/java/org/openapitools/client/model/IngredientTest.java
-src/test/java/org/openapitools/client/model/StockValueTest.java
-src/test/java/org/openapitools/client/model/UnitTypeTest.java

@@ -2,7 +2,7 @@
 
 Ingredient and Dish Management API
 - API version: 1.0.0
-  - Build date: 2026-04-15T14:16:33.152447600+03:00[Africa/Nairobi]
+  - Build date: 2026-04-15T14:31:05.429446200+03:00[Africa/Nairobi]
   - Generator version: 7.7.0
 
 Specification to manage ingredients and dishes
