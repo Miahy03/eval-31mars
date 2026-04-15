@@ -8,10 +8,7 @@ import org.spring.ingredientmanagementwithspringboot.entity.StockValue;
 import org.spring.ingredientmanagementwithspringboot.repository.StockMovementRepository;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,59 +19,77 @@ public class StockMovementRepositoryImpl implements StockMovementRepository {
     public StockMovementRepositoryImpl(Datasource datasource) {
         this.datasource = datasource;
     }
+
     @Override
     public List<StockMovement> findByIngredientAndDateBetween(int ingredientId, Instant from, Instant to) {
+        return List.of();
+    }
+
+    @Override
+    public List<StockMovement> findOneByIngredientId(int id) {
         String sql = """
-            select id, id_ingredient, quantity, type, unit, creation_datetime
-            from stockmovement
-            where id_ingredient = ?
-            and creation_datetime >= ?
-            and creation_datetime <= ?;
-            """;
-
-        try (Connection conn = datasource.getConnection();
-             PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
-
-            preparedStatement.setInt(1, ingredientId);
-            preparedStatement.setTimestamp(2, java.sql.Timestamp.from(from));
-            preparedStatement.setTimestamp(3, java.sql.Timestamp.from(to));
+                select id, id_ingredient, quantity,type,unit, creation_datetime
+                from stockmovement
+                where id_ingredient = ?;
+                """;
+        try(Connection conn = datasource.getConnection();
+            PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+            preparedStatement.setInt(1, id);
 
             List<StockMovement> stockMovements = new ArrayList<>();
-
-            try (ResultSet rs = preparedStatement.executeQuery()) {
+            try(ResultSet rs = preparedStatement.executeQuery()) {
                 while (rs.next()) {
                     StockMovement stockMovement = new StockMovement();
-
                     stockMovement.setId(rs.getInt("id"));
-
                     StockValue stockValue = new StockValue();
                     stockValue.setQuantity(rs.getDouble("quantity"));
                     stockValue.setUnit(UnitType.valueOf(rs.getString("unit")));
-
                     stockMovement.setValue(stockValue);
                     stockMovement.setType(MovementTypeEnum.valueOf(rs.getString("type")));
-                    stockMovement.setCreationDatetime(
-                            rs.getTimestamp("creation_datetime").toInstant()
-                    );
-
+                    stockMovement.setCreationDatetime(rs.getTimestamp("creation_datetime", java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))).toInstant());
                     stockMovements.add(stockMovement);
                 }
             }
-
             return stockMovements;
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<StockMovement> findOneByIngredientId(int id) {
+    public List<StockMovement> findByIngredientAndDateBetween(Long ingredientId, Instant from, Instant to) {
         return List.of();
     }
 
-    @Override
-    public List<StockMovement> findByIngredientAndDateBetween(Long ingredientId, Instant from, Instant to) {
-        return List.of();
+    public List<StockMovement> createStockMovement(int ingId,List<StockMovement> stockMovementList) {
+        String sql = """
+                insert into stockmovement (id_ingredient, quantity, type, unit, creation_datetime)
+                values (?, ?, ?::mouvement_type, ?::unit_type, ?) RETURNING id;
+                """;
+        try(Connection conn = datasource.getConnection();
+            PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+            for(StockMovement stockMovement : stockMovementList){
+                preparedStatement.setInt(1, ingId);
+                preparedStatement.setDouble(2, stockMovement.getValue().getQuantity());
+                preparedStatement.setString(3, stockMovement.getType().name());
+                preparedStatement.setString(4, stockMovement.getValue().getUnit().name());
+                if (stockMovement.getCreationDatetime() == null) {
+                    Instant now = Instant.now();
+                    stockMovement.setCreationDatetime(now);
+                    preparedStatement.setTimestamp(5, java.sql.Timestamp.from(now));
+                } else {
+                    preparedStatement.setTimestamp(5, java.sql.Timestamp.from(stockMovement.getCreationDatetime()));
+                }
+
+                try(ResultSet rs = preparedStatement.executeQuery()) {
+                    if(rs.next()) {
+                        stockMovement.setId(rs.getInt("id"));
+                    }
+                }
+            }
+            return stockMovementList;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
